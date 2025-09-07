@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌱 Gardening ChatBot</title>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #d4fc79, #96e6a1);
+      font-family: "Segoe UI", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .chat-container {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      padding: 20px;
+      width: 100%;
+      max-width: 600px;
+    }
+    .chat-header {
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+      color: #2e7d32;
+    }
+    #response {
+      margin-top: 15px;
+      padding: 12px;
+      min-height: 80px;
+      background: #f9f9f9;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .btn-success {
+      width: 100%;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      padding: 10px;
+    }
+    input {
+      border-radius: 12px !important;
+      padding: 12px;
+    }
+    @media (max-width: 576px) {
+      .chat-container {
+        padding: 15px;
+      }
+      .chat-header {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">🌱 Gardening Helper Bot</div>
+    <div class="form-group">
+      <input
+        type="text"
+        class="form-control"
+        id="userInput"
+        placeholder="Ask me about plants, soil, watering..." />
+    </div>
+    <button class="btn btn-success" onclick="sendMessage()">Ask 🌿</button>
+    <div id="response"></div>
+  </div>
+
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById('userInput').value;
+      const responseDiv = document.getElementById('response');
+      if (!input) {
+        responseDiv.innerHTML = '🌸 Please enter a gardening question.';
+        return;
+      }
+      responseDiv.innerHTML = '🌼 Thinking...';
+      try {
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: "Bearer <OPENROUTER_API_KEY>", //API key
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://www.sitename.com",
+            "X-Title": "GardeningBot"
+          },
+          body: JSON.stringify({
+            model: "deepseek/deepseek-r1:free",
+            messages: [
+              {
+                role: "system",
+                content: "You are a helpful gardening assistant. Only answer gardening, plants, soil, watering, compost, flowers, vegetables related questions. If user asks something unrelated, politely guide them back to gardening topics."
+              },
+              { role: "user", content: input }
+            ]
+          }),
+        });
+        const data = await response.json();
+        const markdownText =
+          data.choices?.[0]?.message?.content || "🌱 Sorry, I couldn’t find an answer.";
+        responseDiv.innerHTML = marked.parse(markdownText);
+      } catch (error) {
+        responseDiv.innerHTML = "❌ Error: " + error.message;
+      }
+    }
+  </script>
+</body>
+</html>
